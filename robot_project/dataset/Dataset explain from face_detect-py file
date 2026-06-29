@@ -1,0 +1,10 @@
+Collect from:
+Chanthol-> select 200
+Chhanyonh -> Select 50
+Chhungchhan ->Select 50
+Hechhang -> select 50
+Seyoen -> select 50
+
+Finally dataset will put in 2 main folders:
+   1. mrdavid  -> containt all Chanthol 200 photos
+   2. others   -> contail all photos of Chhanyonh, hechang, chhungchhan, amnd soyoen each of person is 50 photos

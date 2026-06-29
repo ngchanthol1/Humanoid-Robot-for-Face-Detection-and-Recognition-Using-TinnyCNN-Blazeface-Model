@@ -1,0 +1,299 @@
+# Face Recognition Robot Configuration File
+# All system parameters and settings
+# Compatible with fixed detection format (x1, y1, x2, y2)
+
+# System Settings
+system:
+  name: "Face Recognition Robot"
+  version: "1.0"
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  cooldown_seconds: 5  # Time to wait before next detection after greeting
+  auto_start: false  # Auto-start face detection on launch
+
+# Camera Configuration
+camera:
+  device_id: 0  # USB camera device ID (0 for /dev/video0)
+  width: 640
+  height: 480
+  fps: 30
+  format: "BGR"  # OpenCV default format
+  backend: "V4L2"  # Video4Linux2 for Raspberry Pi
+
+# Model Paths
+models:
+  blazeface_path: "models/blazeface.tflite"
+  tinycnn_path: "models/tinycnn_mrdavid.tflite"
+  auto_download: true  # Auto-download models if not found
+
+# Face Detection Settings (BlazeFace)
+detection:
+  confidence_threshold: 0.7  # Minimum confidence for face detection (0.0-1.0)
+  input_size: 128  # Model input size (128x128 typical for BlazeFace)
+  max_faces: 10  # Maximum number of faces to detect
+  optimize_speed: true  # Enable speed optimizations for Raspberry Pi
+  process_scale: 0.5  # Scale for speed optimization (0.5 = 50% resolution)
+  
+  # Face tracking settings
+  use_tracking: true
+  max_disappeared: 30  # Frames before removing tracked face
+  max_distance: 50  # Max pixel distance to consider same face
+
+# Face Recognition Settings (TinyCNN)
+recognition:
+  confidence_threshold: 0.75  # Minimum confidence to recognize Mr. David (0.0-1.0)
+  input_size: 96  # Model input size for face recognition
+  target_person: "Mr. David"
+  padding: 0.2  # Padding around detected face (20%)
+  
+  # Recognition behavior
+  auto_enable: true  # Auto-enable recognition when detection starts
+  continuous: true  # Continuously recognize faces
+  save_unknown: false  # Save images of unknown people
+
+# Serial/UART Settings for STM32
+serial:
+  port: "/dev/ttyAMA0"  # UART device path on Raspberry Pi
+  baudrate: 115200
+  timeout: 1
+  bytesize: 8
+  parity: "N"  # None
+  stopbits: 1
+  
+  # Alternative ports to try (in order)
+  alternative_ports:
+    - "/dev/ttyUSB0"
+    - "/dev/ttyACM0"
+    - "/dev/serial0"
+
+# Servo Motor Settings (16 motors)
+servo:
+  count: 16
+  angle_min: -160
+  angle_max: 160
+  default_angle: 0
+  default_color: "RGBMIX"
+  
+  # Motor configurations
+  motors:
+    1: { name: "Motor 1", type: "RGB Servo" }
+    2: { name: "Motor 2", type: "RGB Servo" }
+    3: { name: "Motor 3", type: "RGB Servo" }
+    4: { name: "Motor 4", type: "RGB Servo" }
+    5: { name: "Motor 5", type: "RGB Servo" }
+    6: { name: "Motor 6", type: "RGB Servo" }
+    7: { name: "Motor 7", type: "RGB Servo" }
+    8: { name: "Motor 8", type: "RGB Servo" }
+    9: { name: "Motor 9", type: "RGB Servo" }
+    10: { name: "Motor 10", type: "RGB Servo" }
+    11: { name: "Motor 11", type: "RGB Servo" }
+    12: { name: "Motor 12", type: "RGB Servo" }
+    13: { name: "Motor 13", type: "RGB Servo" }
+    14: { name: "Motor 14", type: "RGB Servo" }
+    15: { name: "Motor 15", type: "RGB Servo" }
+    16: { name: "Motor 16", type: "RGB Servo" }
+  
+  # RGB Color modes
+  colors:
+    RGBMIX: "Red Mix"
+    REDGREEN: "Red-Green"
+    GREENBLUE: "Green-Blue"
+
+# Greeting Action Configuration
+greeting:
+  enabled: true
+  
+  # Step 1: Color flash acknowledgment
+  step1_flash:
+    duration: 0.2  # seconds per color
+    colors: ["RGBMIX", "GREENBLUE", "REDGREEN"]
+    
+  # Step 2: All motors to GREEN
+  step2_color:
+    color: "REDGREEN"
+    duration: 0.5
+    
+  # Step 3: Wave motion (motors 5-12)
+  step3_wave:
+    motors: [5, 6, 7, 8, 9, 10, 11, 12]
+    sequence: [0, 45, 90, 45, 0, -45, 0]
+    duration_per_angle: 0.4
+    
+  # Step 4: Return to neutral
+  step4_reset:
+    angle: 0
+    color: "REDGREEN"
+    delay: 0.02  # between motors
+  
+  # Cooldown before next greeting
+  cooldown: 5  # seconds
+
+# Alternative: Simple greeting (fewer steps)
+greeting_simple:
+  enabled: false
+  
+  # Initial angles for greeting (all motors except motor 1)
+  initial_angles:
+    1: 10   # Motor 1 = 10°
+    2: 0    # All others = 0°
+  
+  # Final angles (motors 1 and 2 move to 20°)
+  final_angles:
+    1: 20   # Motor 1 = 20°
+    2: 20   # Motor 2 = 20°
+  
+  # All motors set to GREEN during greeting
+  color: "REDGREEN"
+
+# Pattern Animations
+patterns:
+  rainbow_wave:
+    enabled: true
+    colors: ["RGBMIX", "REDGREEN", "GREENBLUE"]
+    cycles: 2
+    delay: 0.5
+    
+  wave_motion:
+    enabled: true
+    angles: [-45, 0, 45, 0]
+    repetitions: 2
+    delay: 0.4
+
+# File Paths
+paths:
+  # Dataset directories
+  dataset_dir: "dataset"
+  mrdavid_dir: "dataset/mrdavid"
+  others_dir: "dataset/others"
+  
+  # Output directories
+  test_images_dir: "test_images"
+  log_dir: "logs"
+  models_dir: "models"
+  face_crops_dir: "face_crops"
+  
+  # Temporary files
+  temp_dir: "temp"
+
+# Training Configuration
+training:
+  img_size: 96
+  epochs: 50
+  batch_size: 32
+  validation_split: 0.2
+  learning_rate: 0.001
+  
+  # Data augmentation
+  augmentation:
+    horizontal_flip: true
+    rotation: 0.15
+    zoom: 0.15
+    contrast: 0.15
+    brightness: 0.15
+  
+  # Early stopping
+  early_stopping:
+    patience: 15
+    restore_best_weights: true
+  
+  # Learning rate reduction
+  reduce_lr:
+    factor: 0.5
+    patience: 7
+    min_lr: 0.0000001
+
+# Display Settings
+display:
+  show_fps: true
+  show_state: true
+  show_confidence: true
+  show_face_id: true
+  window_name: "Face Recognition Robot"
+  
+  # Colors for display (BGR format)
+  colors:
+    detection_box: [0, 255, 255]  # Yellow
+    recognition_box: [0, 255, 0]  # Green
+    unknown_box: [0, 0, 255]  # Red
+    text_color: [255, 255, 255]  # White
+    fps_color: [0, 255, 255]  # Yellow
+  
+  # Font settings
+  font: "HERSHEY_SIMPLEX"
+  font_scale: 0.7
+  font_thickness: 2
+
+# Performance Settings
+performance:
+  # Threading
+  use_threading: true
+  max_queue_size: 5
+  
+  # Processing
+  skip_frames: 0  # Skip N frames between processing (0 = process all)
+  resize_for_display: true
+  display_width: 640
+  display_height: 480
+
+# Debug Settings
+debug:
+  enabled: false
+  save_frames: false
+  save_detections: false
+  verbose_logging: false
+  show_timing: false
+
+# Safety Settings
+safety:
+  # Angle limits (safety bounds)
+  enforce_angle_limits: true
+  angle_min: -160
+  angle_max: 160
+  
+  # Speed limits
+  max_angle_change_per_second: 180
+  min_command_interval: 0.02  # seconds
+  
+  # Emergency stop
+  emergency_stop_key: "ESC"
+  auto_stop_on_error: true
+
+# System Information
+info:
+  author: "Face Recognition Robot Team"
+  description: "Humanoid robot with face recognition and RGB servo control"
+  hardware:
+    - "Raspberry Pi 5"
+    - "STM32F103"
+    - "16x RGB Servo Motors"
+    - "C270 HD Webcam"
+  software:
+    - "BlazeFace TFLite"
+    - "TinyCNN"
+    - "OpenCV"
+    - "TensorFlow Lite"
+
+# Notes and Tips
+# ===============
+# 1. Adjust confidence thresholds based on your environment
+#    - Lower = more sensitive but more false positives
+#    - Higher = more strict but may miss detections
+#
+# 2. For better performance on Raspberry Pi:
+#    - Enable optimize_speed in detection settings
+#    - Reduce camera resolution if needed
+#    - Use process_scale < 1.0 for faster processing
+#
+# 3. Training tips:
+#    - Collect 50-100 images per category minimum
+#    - Use varied lighting and angles
+#    - Balance dataset (equal images in each category)
+#
+# 4. Serial port troubleshooting:
+#    - Run: ls /dev/ttyAMA* /dev/ttyUSB* /dev/ttyACM*
+#    - Enable UART in raspi-config
+#    - Add user to dialout group: sudo usermod -a -G dialout $USER
+#
+# 5. Model paths:
+#    - Place models in Models/ directory
+#    - BlazeFace will auto-download on first run
+#    - TinyCNN requires training first

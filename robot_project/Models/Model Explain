@@ -1,0 +1,7 @@
+There are 2 main model:
+
+1. blazeface.tflite (generate from blazeface_detector.py)
+    + it is our own create model from sctratch not from download
+
+2. tinycnn_mrdavid.tflite (generate from train_model.py)
+    + it is our own create scratch model too. So we can optimize as we want

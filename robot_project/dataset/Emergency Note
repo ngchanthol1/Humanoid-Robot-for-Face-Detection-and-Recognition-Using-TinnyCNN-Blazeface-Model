@@ -1,0 +1,5 @@
+
+---------!!!!!Becarefu!!!!-------
+
+If you run collect_faces.py file then it will destroy your dataset
+due to it add more face of people. So you need to restor your datset again to preven model Error for next training model 
